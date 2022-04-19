@@ -15,13 +15,11 @@ def events(self):
             if event.key in (pygame.K_a, pygame.K_LEFT):
                 self.dx = -main.TILE
             if event.key in (pygame.K_s, pygame.K_DOWN):
-                self.down = True
+                self.anim_limit = 1
             if event.key == pygame.K_ESCAPE:
                 self.set_record()
+                self.flag = True
                 sys.exit()
-        elif event.type == pygame.KEYUP:
-            if event.key in (pygame.K_s, pygame.K_DOWN):
-                self.down = False
 
     self.figure_old = self.figure.copy()
     self.figure.x += self.dx
@@ -32,4 +30,3 @@ def events(self):
         self.figure.y += main.TILE
         if not self.check_borders():
             self.figure.y -= main.TILE
-            self.down = False
