@@ -1,22 +1,30 @@
 import pygame
-from random import randrange
 import controls
 import figure
 
-W, H = 5, 7
+
+W, H = 5, 8
 TILE = 80
-GAME_RES = W * TILE, H * TILE
-RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + 200
+GAME_RES = W * TILE, (H - 1) * TILE + 4
+RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + 105
 FPS = 60
+
 
 class Py2048:
     def __init__(self):
+        self.width_dict = {}
+        for i in range(W):
+            self.width_dict[i] = i * TILE
         pygame.init()
         pygame.display.set_caption("2048")
-        self.titlefont = pygame.font.SysFont('Comic Sans MS', 25)
-        self.myfont = pygame.font.SysFont('Comic Sans MS', 20)
+        self.myfont1 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 10)
+        self.myfont2 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 15)
+        self.myfont3 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 25)
+        self.myfont4 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 30)
+        self.mini_myfont = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 35)
         self.sc = pygame.display.set_mode(RES)
         self.game_sc = pygame.Surface(GAME_RES)
+
         self.game_sc = self.game_sc.convert_alpha()
         self.alpha_sc = pygame.Surface((TILE, H * TILE))
         self.clock = pygame.time.Clock()
@@ -26,7 +34,7 @@ class Py2048:
 
         self.particles = []
 
-        self.figure = self.figures.copy()
+        self.figure, self.figure_2, self.figure_3 = self.figures.copy(), self.figures.copy(), self.figures.copy()
         self.anim_count, self.anim_speed, self.anim_limit = 0, FPS, 2000
         self.score = 0
 
@@ -35,94 +43,90 @@ class Py2048:
             for x, col in enumerate(raw):
                 if col:
                     self.figure_rect.x, self.figure_rect.y = x * TILE + 2, y * TILE + 2
-                    figure.draw_figure(self, self.figure_rect, col)
+                    figure.draw_figure(self, self.game_sc, self.figure_rect, col)
 
     def check_figure(self):
         dy, dx = int(self.figure.y / TILE), int(self.figure.x / TILE)
-        self.check_field_y()
-        figure.draw_game(self)
-        if dy + 1 < H:
-            if self.field[dy + 1][dx] == self.field[dy][dx]:
-                self.field[dy][dx] *= 2
-                self.field[dy + 1][dx] = 0
-                figure.up_animation(self)
-                self.field[dy + 1][dx] = self.field[dy][dx]
-                self.field[dy][dx] = 0
-                figure.down_animation(self)
-                self.score += self.field[dy + 1][dx]
-                return self.check_figure()
         if dx + 1 < W:
             if self.field[dy][dx + 1] == self.field[dy][dx]:
-                self.field[dy][dx] *= 2
-                self.field[dy][dx + 1] = 0
-                figure.right_animation(self)
-                self.score += self.field[dy][dx]
-                return self.check_figure()
+                self.check_field_left()
         if dx - 1 >= 0:
             if self.field[dy][dx - 1] == self.field[dy][dx]:
-                self.field[dy][dx] *= 2
-                self.field[dy][dx - 1] = 0
-                figure.left_animation(self)
-                self.score += self.field[dy][dx]
-                return self.check_figure()
+                self.check_field_right()
+
+    def check_field_folding(self):
+        for y, raw in enumerate(self.field):
+            for x, col in enumerate(raw):
+                if y != 0 and y != H - 1 and x != 0 and x != W - 1:
+                    center_x = self.field[y][x]
+                    if center_x != 0:
+                        if center_x == self.field[y - 1][x] and center_x == self.field[y][x - 1] and center_x == self.field[y][x + 1]:
+                            self.field[y - 1][x], self.field[y][x - 1], self.field[y][x + 1] = 0, 0, 0
+                            figure.get_folding_animation_cube(self, y, x, center_x)
+                            self.field[y][x] = 0
+                            figure.get_down_animation_cube(self, y, x, center_x)
+                            self.field[y - 1][x] = center_x * 4
+                            self.score += center_x * 4
+                            return self.check_field_folding()
 
     def check_field_y(self):
         for y, raw in enumerate(self.field):
             for x, col in enumerate(raw):
-                if y != 0:
-                    if self.field[y - 1][x] != 0 and col == 0:
-                        self.field[y][x] = self.field[y - 1][x]
-                        self.field[y - 1][x] = 0
+                if y != H - 1:
+                    if self.field[y + 1][x] != 0 and self.field[y + 1][x] == self.field[y][x]:
+                        self.field[y][x] = 0
+                        figure.get_up_animation_cube(self, y, x, col)
+                        self.field[y + 1][x] = 0
+                        figure.get_down_animation_cube(self, y, x, col * 2)
+                        self.field[y][x] = col * 2
+                        self.score += self.field[y][x]
+                        return self.check_field_y()
+                    if self.field[y + 1][x] != 0 and col == 0:
+                        colr = self.field[y + 1][x]
+                        self.field[y][x] = self.field[y + 1][x]
+                        self.field[y + 1][x] = 0
+                        figure.get_down_animation_cube(self, y, x, colr)
+                        self.field[y][x] = colr
                         return self.check_field_y()
 
-    def check_field_x(self):
+    def check_field_right(self):
         for y, raw in enumerate(self.field):
             for x, col in enumerate(raw):
                 if x != 0:
                     if self.field[y][x - 1] == self.field[y][x] and col != 0:
-                        self.field[y][x] = self.field[y][x - 1] * 2
                         self.field[y][x - 1] = 0
-                        return self.check_field_x()
+                        figure.get_right_animation_cube(self, y, x, col)
+                        self.field[y][x] = col * 2
+                        self.score += self.field[y][x]
+                        return self.check_field_y()
+
+    def check_field_left(self):
+        for y, raw in enumerate(self.field):
+            for x, col in enumerate(raw):
+                if x != W - 1:
+                    if self.field[y][x + 1] == self.field[y][x] and col != 0:
+                        self.field[y][x + 1] = 0
+                        figure.get_left_animation_cube(self, y, x, col)
+                        self.field[y][x] = col * 2
+                        self.score += self.field[y][x]
+                        return self.check_field_y()
 
     def check_borders(self):
         dy, dx = int(self.figure.y / TILE), int(self.figure.x / TILE)
-        if dy > H and dx > W:
+        if dy > H - 1 and dx > W:
             self.figure.y -= TILE
             return False
         if self.figure.x > W * TILE or self.figure.x < 0:
             return False
-        elif self.figure.y > H * TILE or self.field[dy][dx] > 0:
+        elif self.figure.y <= 0 or self.field[dy][dx] > 0:
             return False
         return True
 
-    def update_particles(self):
-        for i, particle in reversed(list(enumerate(self.particles))):
-            particle[0][0] += particle[1][0]
-            particle[0][1] += particle[1][1]
-            particle[2] -= 0.2
-            reversed_particle = self.particles[len(self.particles) - i - 1]
-
-            pygame.draw.circle(
-                self.game_sc, (255, 255, 255),
-                (int(reversed_particle[0][0]),
-                int(reversed_particle[0][1])),
-                reversed_particle[2]
-            )
-            if particle[2] <= 0:
-                self.particles.pop(i)
-
-    def add_particles(self):
-        pos_x = 0
-        pos_y = 10
-        padius = 5
-        self.particles.append([[self.x, self.y], [pos_x, pos_y], padius])
-
     def game_over(self):
-        for i in self.field[0]:
-            if i != 0:
-                self.set_record()
-                self.score = 0
-                return True
+        if 0 not in self.field[H - 2] and self.num not in self.field[H - 2]:
+            self.set_record()
+            self.score = 0
+            return True
 
     def get_record(self):
         try:
@@ -138,34 +142,42 @@ class Py2048:
             f.write(str(rec))
 
     def play(self):
-        self.down, self.flag = False, False
+        self.flag = False
         while True:
+            figure.draw_item_game(self)
+            figure.draw_figure(self, self.game_sc, self.figure, self.num)
             controls.events(self)
 
-            self.anim_count += self.anim_speed
             if self.anim_count > self.anim_limit:
                 self.anim_count = 0
-                self.figure.y += 20
+                self.figure.y -= 40
                 if not self.check_borders():
                     self.anim_limit = 2000
                     self.flag = False
-                    self.figure.y -= TILE
-                    dy, dx = int(self.figure.y / TILE), int(self.figure.x / TILE)
+                    self.figure.y += 40
+
+                    figure.get_animation_cube(self)
+                    dy, dx = self.figure.y // TILE, self.figure.x // TILE
+                    
                     self.field[dy][dx] = self.num
-                    self.check_figure()
-                    self.check_field_x()
+                    for _ in range(2):
+                        self.check_field_folding()
+                        self.check_field_y()
+                        self.check_figure()
+                    self.check_field_left()
+                    self.check_field_right()
 
                     if self.game_over():
                         break
 
-                    self.next_num = self.new_num()
                     self.num = self.next_num
-                    self.figure.x, self.figure.y = TILE * randrange(W) + 2, 2
+                    self.next_num = self.new_num()
+                    self.figure.y = H * TILE - TILE + 2
 
             self.get_grid()
             figure.draw_game(self)
-            figure.next_num(self, self.next_num)
-            # self.add_particles()
+            figure.get_num(self)
+            figure.get_next_num(self)
 
             pygame.display.flip()
             self.clock.tick(FPS)
