@@ -7,7 +7,7 @@ W, H = 5, 8
 TILE = 80
 GAME_RES = W * TILE, (H - 1) * TILE + 4
 RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + 105
-FPS = 60
+FPS = 120
 
 
 class Py2048:
@@ -22,20 +22,25 @@ class Py2048:
         self.myfont3 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 25)
         self.myfont4 = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 30)
         self.mini_myfont = pygame.font.SysFont('Comic Sans MS', TILE // 2 - 35)
+
         self.sc = pygame.display.set_mode(RES)
         self.game_sc = pygame.Surface(GAME_RES)
 
         self.game_sc = self.game_sc.convert_alpha()
-        self.alpha_sc = pygame.Surface((TILE, H * TILE))
+        self.alpha_sc = pygame.Surface(GAME_RES)
+        self.alpha_sc = self.alpha_sc.convert_alpha()
+
         self.clock = pygame.time.Clock()
 
         self.grid = [pygame.Rect(x * TILE, y * TILE, TILE, TILE) for x in range(W) for y in range(H)]
+        self.field = [[0 for i in range(W)] for j in range(H)]
         figure.new_figure(self)
 
-        self.particles = []
+        self.game_bg = pygame.image.load('img/fon.png').convert()
 
         self.figure, self.figure_2, self.figure_3 = self.figures.copy(), self.figures.copy(), self.figures.copy()
         self.anim_count, self.anim_speed, self.anim_limit = 0, FPS, 2000
+        self.paused = False
         self.score = 0
 
     def get_grid(self):
@@ -77,8 +82,8 @@ class Py2048:
                         self.field[y][x] = 0
                         figure.get_up_animation_cube(self, y, x, col)
                         self.field[y + 1][x] = 0
-                        figure.get_down_animation_cube(self, y, x, col * 2)
                         self.field[y][x] = col * 2
+                        figure.get_down_animation_cube(self, y, x, col * 2)
                         self.score += self.field[y][x]
                         return self.check_field_y()
                     if self.field[y + 1][x] != 0 and col == 0:
@@ -142,21 +147,21 @@ class Py2048:
             f.write(str(rec))
 
     def play(self):
-        self.flag = False
         while True:
             figure.draw_item_game(self)
-            figure.draw_figure(self, self.game_sc, self.figure, self.num)
             controls.events(self)
+            if self.anim_count > self.anim_limit:
+                figure.strip_game(self)
+            figure.draw_figure(self, self.game_sc, self.figure, self.num)
 
             if self.anim_count > self.anim_limit:
                 self.anim_count = 0
                 self.figure.y -= 40
                 if not self.check_borders():
                     self.anim_limit = 2000
-                    self.flag = False
                     self.figure.y += 40
 
-                    figure.get_animation_cube(self)
+                    figure.get_animation_cube(self, self.num)
                     dy, dx = self.figure.y // TILE, self.figure.x // TILE
                     
                     self.field[dy][dx] = self.num
@@ -175,7 +180,7 @@ class Py2048:
                     self.figure.y = H * TILE - TILE + 2
 
             self.get_grid()
-            figure.draw_game(self)
+            figure.draw_text_game(self)
             figure.get_num(self)
             figure.get_next_num(self)
 
