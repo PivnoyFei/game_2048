@@ -20,17 +20,21 @@ def events(self):
                     self.anim_limit = -1
 
         if event.type == pygame.KEYDOWN:
-            if not self.paused:
-                if event.key in (pygame.K_d, pygame.K_RIGHT):
-                    self.dx = main.TILE
-                if event.key in (pygame.K_a, pygame.K_LEFT):
-                    self.dx = -main.TILE
-                if event.key in (pygame.K_w, pygame.K_UP):
-                    if self.field[main.H -2][int(self.figure.x / main.TILE)] in (0, self.num):
-                        self.anim_limit = -1
+
+            if event.key in (pygame.K_d, pygame.K_RIGHT):
+                self.dx = main.TILE
+            if event.key in (pygame.K_a, pygame.K_LEFT):
+                self.dx = -main.TILE
+            if event.key in (pygame.K_w, pygame.K_UP):
+                if self.field[main.H -2][int(self.figure.x / main.TILE)] in (0, self.num):
+                    self.anim_limit = -1
             if event.key == pygame.K_ESCAPE:
                 if self.paused:
                     self.paused = False
                 else:
                     self.paused = True
                     paused_menu.paused_game_menu(self)
+        
+    self.figure.x += self.dx
+    if not self.check_borders():
+        self.figure.x -= self.dx
