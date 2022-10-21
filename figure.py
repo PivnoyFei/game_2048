@@ -1,23 +1,7 @@
 import pygame
-from random import choice, randrange
+
 import main
 from constants import CP
-
-
-def new_figure(self):
-    self.x = (main.W // 2) * main.TILE + 2
-    self.y = main.H * main.TILE - main.TILE + 2
-    self.figures = pygame.Rect(self.x, self.y, main.TILE - 4, main.TILE - 4)
-
-    self.new_num = lambda: choice([2, 4, 8, 16, 32, 64])
-    self.next_num = self.new_num()
-    self.num = self.next_num
-
-    self.figure_rect = pygame.Rect(
-        main.W * main.TILE - main.TILE + 2,
-        main.H * main.TILE - main.TILE + 2,
-        main.TILE - 4,
-        main.TILE - 4)
 
 
 def draw_figure(self, sc, figure, num):
@@ -67,16 +51,15 @@ def get_next_num(self):
     self.sc.blit(text_surface, self.text_rect)
 
 
-def strip_game(self):
-    pygame.draw.rect(
-        self.game_sc,
-        (*CP[self.num], 70),
-        (self.figure.x, 0, main.TILE - 4, main.H * main.TILE)
-    )
+# def strip_game(self):
+#     pygame.draw.rect(
+#         self.game_sc,
+#         (*CP[self.num], 70),
+#         (self.figure.x, 0, main.TILE - 4, main.H * main.TILE)
+#     )
 
 
 def draw_item_game(self):
-    self.record = self.get_record()
     self.sc.fill((0, 0, 0))
     self.sc.blit(self.game_sc, (5, 50))
     self.game_sc.blit(self.game_bg, (0, 0))
@@ -84,8 +67,7 @@ def draw_item_game(self):
     [pygame.draw.rect(
         self.game_sc, (0, 0, 0),
         (i_rect * main.TILE - 2, 0, 4, main.H * main.TILE + 2))
-        for i_rect in range(main.W) if i_rect != 0
-    ]
+        for i_rect in range(main.W) if i_rect != 0]
 
 
 def draw_text_game(self):
@@ -95,42 +77,45 @@ def draw_text_game(self):
     self.sc.blit(text, text.get_rect(center=(main.WIDTH - main.TILE, main.TILE // 4)))
 
 
-def cube_animation_repeat(self, game_sc, figure, col):
+def cube_animation_repeat(self, game_sc, figure, figure_2=None, figure_3=None, col=None):
     draw_item_game(self)
     draw_figure(self, game_sc, figure, col)
+    if figure_2:
+        draw_figure(self, game_sc, figure_2, col)
+    if figure_3:
+        draw_figure(self, game_sc, figure_3, col)
+
+    self.get_grid()
     draw_text_game(self)
     get_num(self)
     get_next_num(self)
-    self.get_grid()
     pygame.display.update()
     self.clock.tick(main.FPS)
 
 
 def get_folding_animation_cube(self, y, x, col):
     self.figure.x, self.figure.y = x * main.TILE + 2, (y - 1) * main.TILE + 2
-    self.figure_2.x, self.figure_2.y = (x - 1) * main.TILE + 2, y * main.TILE + 2
-    self.figure_3.x, self.figure_2.y = (x + 1) * main.TILE + 2, y * main.TILE + 2
+    self.figure_2.x, self.figure_2.y = (x + 1) * main.TILE + 2, y * main.TILE + 2
+    self.figure_3.x, self.figure_3.y = (x - 1) * main.TILE + 2, y * main.TILE + 2
     for _ in range(main.TILE // 8):
         self.figure.y += 8
-        self.figure_2.x += 8
-        self.figure_3.x -= 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col)
-        cube_animation_repeat(self, self.game_sc, self.figure_2, col)
-        cube_animation_repeat(self, self.game_sc, self.figure_3, col)
+        self.figure_2.x -= 8
+        self.figure_3.x += 8
+        cube_animation_repeat(self, self.game_sc, self.figure, self.figure_2, self.figure_3, col)
 
 
 def get_up_animation_cube(self, y, x, col):
     self.figure.x, self.figure.y = x * main.TILE + 2, y * main.TILE + 2
     for _ in range(main.TILE // 8):
         self.figure.y += 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col)
+        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
 
 
 def get_down_animation_cube(self, y, x, col):
     self.figure.x, self.figure.y = x * main.TILE + 2, (y + 1) * main.TILE + 2
     for _ in range(main.TILE // 10):
         self.figure.y -= 10
-        cube_animation_repeat(self, self.game_sc, self.figure, col)
+        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
     get_animation_cube(self, col)
 
 
@@ -138,14 +123,14 @@ def get_left_animation_cube(self, y, x, col):
     self.figure.x, self.figure.y = (x + 1) * main.TILE + 2, y * main.TILE + 2
     for _ in range(main.TILE // 8):
         self.figure.x -= 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col)
+        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
 
 
 def get_right_animation_cube(self, y, x, col):
     self.figure.x, self.figure.y = (x - 1) * main.TILE + 2, y * main.TILE + 2
     for _ in range(main.TILE // 8):
         self.figure.x += 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col)
+        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
 
 
 def get_animation_cube(self, col):
@@ -157,7 +142,7 @@ def get_animation_cube(self, col):
         b -= 1
         self.figure.x -= 1
         figure = pygame.Rect(self.figure.x, self.figure.y, a, b)
-        cube_animation_repeat(self, self.game_sc, figure, col)
+        cube_animation_repeat(self, self.game_sc, figure, col=col)
     a -= 3
     b += 1
     self.figure.x += 1
@@ -166,16 +151,5 @@ def get_animation_cube(self, col):
         b += 2
         self.figure.x += 3
         figure = pygame.Rect(self.figure.x, self.figure.y, a, b)
-        cube_animation_repeat(self, self.game_sc, figure, col)
+        cube_animation_repeat(self, self.game_sc, figure, col=col)
     self.figure.x = source
-
-
-#def get_animation_cube(self):
-#    a, b = main.TILE, main.TILE
-#    for _ in range(8):
- #       a += 1
- #       b -= 1
- #       self.figure.x -= 1
- #       figure = pygame.Rect(self.figure.x, self.figure.y, a, b)
- #       cube_animation_repeat(self, self.game_sc, figure, self.num)
- #   self.figure.x += 8
