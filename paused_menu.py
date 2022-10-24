@@ -2,29 +2,52 @@ import pygame
 
 import controls
 import figure
-import main
+from settings import HALF_TILE, HEIGHT, MY_FONT_PAUSED, TILE, WHITE, WIDTH
 
 
 def print_text(self):
-    text = self.myfont1.render("Paused", True, pygame.Color("white"))
-    self.sc.blit(text, text.get_rect(center=(main.WIDTH // 2, main.HEIGHT // 3)))
+    myfont = pygame.font.SysFont(MY_FONT_PAUSED, HALF_TILE - TILE // 6)
+    text = myfont.render("Нажмите, чтобы начать", True, WHITE)
+    self.paused_text = text.get_rect(center=(WIDTH // 2, HEIGHT // 3))
+    self.sc.blit(text, (WIDTH // 7, self.paused_figure))
 
 
 def paused_game_menu(self):
-    self.transparency = 0
-    pygame.draw.rect(self.alpha_sc, (0, 0, 0, 0), (0, 0, main.WIDTH, main.HEIGHT))
     figure.draw_text_game(self)
-    figure.get_num(self)
-    figure.get_next_num(self)
+    figure.lower_menu(self)
+
+    ground = HEIGHT // 3
+    jump_force = 5
+    move = jump_force + 1
+    self.paused_figure = ground
+
+    for _ in range(10):
+        self.alpha_sc.fill((0, 0, 15, 15))
+        self.sc.blit(self.alpha_sc, (0, 0))
+        pygame.display.update()
+        self.clock.tick(24)
 
     while self.paused:
         controls.events(self)
-        pygame.display.flip()
+        self.get_grid()
+        figure.draw_item_game(self)
+        figure.draw_text_game(self)
+        figure.lower_menu(self)
+        figure.draw_figure(self, self.game_sc, self.figure, self.num)
+        self.alpha_sc.fill((0, 0, 15, 150))
+        self.sc.blit(self.alpha_sc, (0, 0))
+
+        if True and ground == self.paused_figure:
+            move = -jump_force
+        if move <= jump_force:
+            if self.paused_figure + move < ground:
+                self.paused_figure += move
+                if move < jump_force:
+                    move += 1
+            else:
+                self.paused_figure = ground
+                move = jump_force + 1
+
         print_text(self)
-        if self.transparency < 10:
-            self.transparency += 1
-            self.alpha_sc.fill((0, 0, 5, 15))
-            self.sc.blit(self.alpha_sc, (0, 0))
-            self.clock.tick(30)
-        else:
-            self.clock.tick(15)
+        pygame.display.update()
+        self.clock.tick(17)
