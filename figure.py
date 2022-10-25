@@ -17,19 +17,33 @@ def __figure(num_one, num_two, num_three):
 
 
 def draw_figure(
-        self, sc, figure, num, myfont_one=None, myfont_two=None,
+        self, sc, figure, num, myfont=False,
         x=HALF_TILE - 2, y=HALF_TILE - 4
 ):
     """Отображает конкретную фигуру с номером, на поле."""
-    if not myfont_one:
+    if myfont:
+        myfont_one, myfont_two = self.myfont_three, self.myfont_four
+    else:
         myfont_one, myfont_two = self.myfont_one, self.myfont_two
 
-    pygame.draw.rect(sc, CP[num], figure, border_radius=4)
     col = WHITE if 1024 > num < 256 else BLACK
-    if num < 1000:
-        text_surface = myfont_one.render(f'{num}', True, col)
+    if 1000 > num:
+        myfont = myfont_one
+    elif 1000 < num < 10000:
+        myfont = myfont_two
+    elif 10000 < num < 1000000:
+        myfont = self.myfont_three
+    elif 1000000 < num < 10000000:
+        myfont = self.myfont_four
     else:
-        text_surface = myfont_two.render(f'{num}', True, col)
+        myfont = self.mini_myfont
+    if num not in CP:
+        CP[num] = (237, 207, 114)
+
+    text_surface = myfont.render(f'{num}', True, col)
+
+    pygame.draw.rect(sc, CP[num], figure, border_radius=4)
+
     self.text_rect = text_surface.get_rect(center=(
         figure.x + x, figure.y + y))
     sc.blit(text_surface, self.text_rect)
@@ -42,8 +56,7 @@ def lower_menu(self):
 
     figure = __figure(TILE * 1.3, 18, HALF_TILE + 4)
     draw_figure(
-        self, self.sc, figure, self.next_num,
-        self.myfont_three, self.myfont_four,
+        self, self.sc, figure, self.next_num, True,
         TILE // 4 + 2, TILE // 4)
 
     figure = __figure(TILE * 2.25, 18, HALF_TILE + 4)
@@ -79,6 +92,9 @@ def draw_item_game(self):
         self.game_sc, BLACK,
         (i * TILE - 2, 0, 4, H * TILE))
         for i in range(W + 1)]
+
+    if self.num not in CP:
+        CP[self.num] = (237, 207, 114)
     pygame.draw.rect(
         self.game_sc, (*CP[self.num], 70),
         (self.x_line, 0, TILE - 4, H * TILE)

@@ -16,6 +16,10 @@ RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + TILE
 PAUSE_X = (W * TILE - TILE * 0.75, W * TILE - TILE * 0.2)
 PAUSE_Y = (H * TILE, H * TILE + TILE * 0.6)
 
+THREE_QUARTERS = int(HALF_TILE * 1.5)
+UPDATE_PAUSE_X = (WIDTH // 2 - TILE, WIDTH // 2 + TILE // 4)
+UPDATE_PAUSE_Y = HEIGHT // 2
+
 FPS = 120
 
 WHITE = (255, 255, 255)
@@ -42,5 +46,7 @@ CP = {
     2048: (251, 63, 81),
     4096: (8, 108, 162),
     8192: (255, 180, 89),
-    16384: (255, 65, 0)
+    16384: (255, 65, 0),
+    32768: (237, 197, 63),
+    65536: (246, 94, 59),
 }

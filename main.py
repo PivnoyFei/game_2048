@@ -6,7 +6,7 @@ import pygame
 import controls
 import figure
 from settings import (FPS, GAME_RES, HALF_TILE, HEIGHT, MY_FONT, RES, TILE,
-                      WIDTH, H, W, CP)
+                      WIDTH, H, W)
 
 
 class Py2048:
@@ -22,7 +22,7 @@ class Py2048:
         self.myfont_two = pygame.font.SysFont(MY_FONT, int(HALF_TILE * 0.6))
         self.myfont_three = pygame.font.SysFont(MY_FONT, int(HALF_TILE * 0.5))
         self.myfont_four = pygame.font.SysFont(MY_FONT, int(HALF_TILE * 0.4))
-        self.mini_myfont = pygame.font.SysFont(MY_FONT, int(HALF_TILE * 0.2))
+        self.mini_myfont = pygame.font.SysFont(MY_FONT, int(HALF_TILE * 0.3))
 
         self.sc = pygame.display.set_mode(RES, pygame.DOUBLEBUF)
         self.sprite_sc = pygame.Surface(RES).convert_alpha()

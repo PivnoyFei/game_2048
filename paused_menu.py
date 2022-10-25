@@ -2,15 +2,32 @@ import pygame
 
 import controls
 import figure
-from settings import HALF_TILE, HEIGHT, MY_FONT_PAUSED, WHITE, WIDTH
+from settings import (HALF_TILE, HEIGHT, MY_FONT_PAUSED, THREE_QUARTERS,
+                      TRAFFIC_BLACK, UPDATE_PAUSE_X, UPDATE_PAUSE_Y, WHITE,
+                      WIDTH)
 
 
-def print_text(self):
+def print_paused_text(self):
     """Рисует поступающие кадры прыгающего текста."""
     myfont = pygame.font.SysFont(MY_FONT_PAUSED, int(HALF_TILE * 0.8))
     text = myfont.render("Нажмите, чтобы начать", True, WHITE)
     text_center = text.get_rect(center=(WIDTH // 2, self.paused_figure))
     self.sc.blit(text, text_center)
+
+
+def print_paused_figure(self, x, filename, rotate=None):
+    """Рисует кнопку перезапуска и закрытия игры."""
+    size = HALF_TILE
+    figur = pygame.Rect(x, UPDATE_PAUSE_Y, THREE_QUARTERS, THREE_QUARTERS)
+    image = pygame.image.load(filename).convert_alpha()
+    if rotate:
+        image = pygame.transform.rotate(image, 45)
+        size = int(HALF_TILE * 1.4)
+    image = pygame.transform.scale(image, (size, size))
+    new_rect = image.get_rect(
+        center=(figur.x + THREE_QUARTERS // 2, figur.y + THREE_QUARTERS // 2))
+    pygame.draw.rect(self.sc, TRAFFIC_BLACK, figur, border_radius=4)
+    self.sc.blit(image, new_rect)
 
 
 def paused_game_menu(self):
@@ -49,6 +66,10 @@ def paused_game_menu(self):
                 self.paused_figure = ground
                 move = jump_force + 1
 
-        print_text(self)
+        print_paused_text(self)
+        print_paused_figure(
+            self, UPDATE_PAUSE_X[0], 'madia/Update.png')
+        print_paused_figure(
+            self, UPDATE_PAUSE_X[1], 'madia/X.png', 45)
         pygame.display.update()
         self.clock.tick(17)
