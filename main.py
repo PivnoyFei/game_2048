@@ -1,18 +1,17 @@
-from random import choice
+from random import choice, randint, randrange
 
 import numpy as np
 import pygame
 
 import controls
 import figure
-from settings import FPS, GAME_RES, HALF_TILE, MY_FONT, RES, TILE, H, W
+from settings import (FPS, GAME_RES, HALF_TILE, HEIGHT, MY_FONT, RES, TILE,
+                      WIDTH, H, W, CP)
 
 
 class Py2048:
     def __init__(self):
-        self.width_dict = {}
-        for i in range(W):
-            self.width_dict[i] = i * TILE
+        self.width_dict = {i: i * TILE for i in range(W)}
         pygame.mixer.pre_init(44100, -16, 1, 512)
         pygame.init()
         self.falling_sound = pygame.mixer.Sound('madia/falling_sound.mp3')
@@ -38,6 +37,7 @@ class Py2048:
         self.x = (W // 2) * TILE + 2
         self.y = H * TILE - TILE + 2
         self.figures = pygame.Rect(self.x, self.y, TILE - 4, TILE - 4)
+        self.x_line = self.x
 
         self.figure = self.figures.copy()
         self.figure_2 = self.figures.copy()
@@ -57,6 +57,11 @@ class Py2048:
         self.score = 0
 
         self.anim_count, self.anim_speed, self.anim_limit = 0, FPS, 2000
+
+        self.star_list = [[
+            randrange(WIDTH), randrange(HEIGHT), randint(1, 3)
+        ] for _ in range(50)]
+
         self.clock = pygame.time.Clock()
         self.paused = False
 
@@ -186,16 +191,16 @@ class Py2048:
     @staticmethod
     def get_record():
         try:
-            with open('record') as f:
+            with open('record.txt') as f:
                 return f.readline()
         except FileNotFoundError:
-            with open('record', 'w') as f:
+            with open('record.txt', 'w') as f:
                 f.write('0')
 
     def set_record(self):
         """Записывает новый рекорд."""
         rec = max(int(self.record), self.score)
-        with open('record', 'w') as f:
+        with open('record.txt', 'w') as f:
             f.write(str(rec))
 
     def play(self):

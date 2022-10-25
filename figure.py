@@ -1,7 +1,9 @@
+from random import randrange
+
 import pygame
 
 from settings import (BLACK, BORDER_X, BORDER_Y, CP, FPS, GOLD, HALF_TILE,
-                      TILE, TRAFFIC_BLACK, WHITE, WIDTH, H, W)
+                      HEIGHT, TILE, TRAFFIC_BLACK, WHITE, WIDTH, H, W)
 
 
 def __figure(num_one, num_two, num_three):
@@ -60,14 +62,27 @@ def lower_menu(self):
 def draw_item_game(self):
     """Отображает игровое поле."""
     self.sc.fill(BLACK)
+
+    """Обрабатываем каждую звезду в списке."""
+    for star in self.star_list:
+        pygame.draw.circle(self.sc, WHITE, star[0: 2], 2)
+        star[1] += star[2]
+        if star[1] > HEIGHT:
+            star[0] = randrange(WIDTH)
+            star[1] = randrange(-50, -10)
+
     self.sc.blit(self.game_sc, (BORDER_X[0], BORDER_Y[0]))
     self.game_sc.blit(self.game_bg, (0, 0))
 
     """Рисует разделительные полосы."""
     [pygame.draw.rect(
         self.game_sc, BLACK,
-        (i * TILE - 2, 0, 4, H * TILE + 2))
-        for i in range(W) if i != 0]
+        (i * TILE - 2, 0, 4, H * TILE))
+        for i in range(W + 1)]
+    pygame.draw.rect(
+        self.game_sc, (*CP[self.num], 70),
+        (self.x_line, 0, TILE - 4, H * TILE)
+    )
 
 
 def draw_text_game(self):

@@ -36,7 +36,7 @@ python -m pip install --upgrade pip
 
 Ставим зависимости из requirements.txt:
 ```bash
-pip install -r api_yamdb/requirements.txt
+pip install -r requirements.txt
 ```
 
 Запускаем проект:

@@ -3,7 +3,7 @@ import sys
 import pygame
 
 import paused_menu
-from settings import BORDER_X, BORDER_Y, TILE, H, PAUSE_X, PAUSE_Y
+from settings import BORDER_X, BORDER_Y, PAUSE_X, PAUSE_Y, TILE, H
 
 
 def events(self):
@@ -25,6 +25,7 @@ def events(self):
                     self.strip_dx = (self.strip_dx - 5) // TILE
                     self.figure.x += self.width_dict[self.strip_dx]
                     figure_on_field = self.field[H - 2, self.figure.x // TILE]
+                    self.x_line = self.figure.x
                     if figure_on_field in (0, self.num):
                         self.anim_limit = -1
                 """Обработка нажатий по кнопке пауза."""
@@ -48,7 +49,7 @@ def events(self):
                     self.paused = True
                     paused_menu.paused_game_menu(self)
 
-    """Заставляет кубик падать."""
+    self.x_line += self.dx
     self.figure.x += self.dx
     if not self.check_borders():
         self.figure.x -= self.dx
