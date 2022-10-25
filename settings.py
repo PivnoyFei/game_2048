@@ -1,10 +1,21 @@
+"""количество возможных кубиков по ширине и высоте."""
 W, H = 5, 8
+"""Размер кубика."""
 TILE = 80
+"""Половинка кубика."""
 HALF_TILE = TILE // 2
+"""Размер игрового поля."""
 GAME_RES = W * TILE, (H - 1) * TILE + 5
+"""Границы отступа по оси Х."""
 BORDER_X = (5, GAME_RES[0] + 5)
+"""Границы отступа по оси У."""
 BORDER_Y = (TILE // 2 + 10, GAME_RES[1] + TILE // 2 + 10)
+"""Размер окна игры."""
 RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + TILE
+"""Границы кнопки паузы"""
+PAUSE_X = (W * TILE - TILE * 0.75, W * TILE - TILE * 0.2)
+PAUSE_Y = (H * TILE, H * TILE + TILE * 0.6)
+
 FPS = 120
 
 WHITE = (255, 255, 255)
@@ -12,6 +23,7 @@ BLACK = (0, 0, 0)
 GOLD = (255, 215, 0)
 TRAFFIC_BLACK = (30, 30, 30)
 
+"""Шрифты."""
 MY_FONT = 'arialblack'
 MY_FONT_PAUSED = 'bahnschrift'
 

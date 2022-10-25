@@ -5,6 +5,7 @@ from settings import (BLACK, BORDER_X, BORDER_Y, CP, FPS, GOLD, HALF_TILE,
 
 
 def __figure(num_one, num_two, num_three):
+    """Рисует геометрию кубик на поле."""
     return pygame.Rect(
         W * HALF_TILE - HALF_TILE + num_one,
         H * TILE - TILE // 4 + num_two,
@@ -17,6 +18,7 @@ def draw_figure(
         self, sc, figure, num, myfont_one=None, myfont_two=None,
         x=HALF_TILE - 2, y=HALF_TILE - 4
 ):
+    """Отображает конкретную фигуру с номером, на поле."""
     if not myfont_one:
         myfont_one, myfont_two = self.myfont_one, self.myfont_two
 
@@ -61,6 +63,7 @@ def draw_item_game(self):
     self.sc.blit(self.game_sc, (BORDER_X[0], BORDER_Y[0]))
     self.game_sc.blit(self.game_bg, (0, 0))
 
+    """Рисует разделительные полосы."""
     [pygame.draw.rect(
         self.game_sc, BLACK,
         (i * TILE - 2, 0, 4, H * TILE + 2))
@@ -77,9 +80,9 @@ def draw_text_game(self):
 
 def cube_animation_repeat(
         self, game_sc, figure, figure_2=None, figure_3=None, col=None):
+    """Рисует поступающие кадры движения конкретного кубика(-ов)."""
     draw_item_game(self)
     draw_figure(self, game_sc, figure, col)
-    print(figure_2)
     if figure_2:
         draw_figure(self, game_sc, figure_2, col)
     if figure_3:
@@ -93,7 +96,22 @@ def cube_animation_repeat(
     self.clock.tick(FPS)
 
 
+def get_right_left_animation_cube(self, x, y, col):
+    """Анимация слияния трех соседних кубиков."""
+    self.figure.x, self.figure.y = (x - 1) * TILE + 2, y * TILE + 2
+    self.figure_2.x, self.figure_2.y = (x + 1) * TILE + 2, y * TILE + 2
+    self.merge_sound.play()
+
+    for _ in range(TILE // 8):
+        self.figure.x += 8
+        self.figure_2.x -= 8
+        cube_animation_repeat(
+            self, self.game_sc, self.figure, self.figure_2, col=col
+        )
+
+
 def get_folding_animation_cube(self, x, y, col):
+    """Анимация слияния четырех соседних кубиков."""
     self.figure.x, self.figure.y = x * TILE + 2, (y - 1) * TILE + 2
     self.figure_2.x, self.figure_2.y = (x + 1) * TILE + 2, y * TILE + 2
     self.figure_3.x, self.figure_3.y = (x - 1) * TILE + 2, y * TILE + 2
@@ -109,7 +127,8 @@ def get_folding_animation_cube(self, x, y, col):
 
 
 def get_up_animation_cube(self, x, y, col):
-    self.figure.x, self.figure.y = x * TILE + 2, y * TILE + 2
+    """Анимация поглощения верхнего кубика нижним."""
+    self.figure.x, self.figure.y = x * TILE + 2, (y - 1) * TILE + 2
     self.merge_sound.play()
 
     for _ in range(TILE // 8):
@@ -118,7 +137,8 @@ def get_up_animation_cube(self, x, y, col):
 
 
 def get_down_animation_cube(self, x, y, col):
-    self.figure.x, self.figure.y = x * TILE + 2, (y + 1) * TILE + 2
+    """Анимация падения кубика пустую клетку."""
+    self.figure.x, self.figure.y = x * TILE + 2, y * TILE + 2
     self.falling_sound.play()
 
     for _ in range(TILE // 10):
@@ -127,6 +147,7 @@ def get_down_animation_cube(self, x, y, col):
 
 
 def get_left_animation_cube(self, x, y, col):
+    """Анимация поглощения правого кубика левым (сдвиг в левую сторону)."""
     self.figure.x, self.figure.y = (x + 1) * TILE + 2, y * TILE + 2
     self.merge_sound.play()
 
@@ -136,6 +157,7 @@ def get_left_animation_cube(self, x, y, col):
 
 
 def get_right_animation_cube(self, x, y, col):
+    """Анимация поглощения левого кубика правым (сдвиг в правую сторону)."""
     self.figure.x, self.figure.y = (x - 1) * TILE + 2, y * TILE + 2
     self.merge_sound.play()
 
@@ -145,6 +167,7 @@ def get_right_animation_cube(self, x, y, col):
 
 
 def get_animation_cube(self, col):
+    """Анимация падения кубика после нажатия кнопки."""
     a, b = TILE + 1.4, TILE - 1
     source = self.figure.x
     self.figure.x -= 1

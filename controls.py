@@ -3,10 +3,11 @@ import sys
 import pygame
 
 import paused_menu
-from settings import BORDER_X, BORDER_Y, TILE, H, W
+from settings import BORDER_X, BORDER_Y, TILE, H, PAUSE_X, PAUSE_Y
 
 
 def events(self):
+    """Обрабатывает нажатия с клавиатуры и мыши."""
     self.dx = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -17,15 +18,18 @@ def events(self):
                 self.paused = False
             else:
                 self.strip_dx, self.strip_dy = event.pos
+                """Обработка нажатий по игровому полю."""
                 if (BORDER_X[0] < self.strip_dx < BORDER_X[1]
                         and BORDER_Y[0] < self.strip_dy < BORDER_Y[1]):
                     self.figure.x = 2
                     self.strip_dx = (self.strip_dx - 5) // TILE
                     self.figure.x += self.width_dict[self.strip_dx]
-                    if self.field[H - 2][int(self.figure.x / TILE)] in (0, self.num):
+                    figure_on_field = self.field[H - 2, self.figure.x // TILE]
+                    if figure_on_field in (0, self.num):
                         self.anim_limit = -1
-                if (H * TILE < self.strip_dy < H * TILE + TILE * 0.6 
-                        and W * TILE - TILE * 0.75 < self.strip_dx < W * TILE - TILE * 0.2):
+                """Обработка нажатий по кнопке пауза."""
+                if (PAUSE_X[0] < self.strip_dx < PAUSE_X[1]
+                        and PAUSE_Y[0] < self.strip_dy < PAUSE_Y[1]):
                     self.paused = True
                     paused_menu.paused_game_menu(self)
 
@@ -35,7 +39,7 @@ def events(self):
             if event.key in (pygame.K_a, pygame.K_LEFT):
                 self.dx = -TILE
             if event.key in (pygame.K_w, pygame.K_UP):
-                if self.field[H - 2][int(self.figure.x / TILE)] in (0, self.num):
+                if self.field[H - 2, self.figure.x // TILE] in (0, self.num):
                     self.anim_limit = -1
             if event.key == pygame.K_ESCAPE:
                 if self.paused:
@@ -44,6 +48,7 @@ def events(self):
                     self.paused = True
                     paused_menu.paused_game_menu(self)
 
+    """Заставляет кубик падать."""
     self.figure.x += self.dx
     if not self.check_borders():
         self.figure.x -= self.dx
