@@ -12,7 +12,7 @@ BORDER_X = (5, GAME_RES[0] + 5)
 BORDER_Y = (TILE // 2 + 10, GAME_RES[1] + TILE // 2 + 10)
 """Размер окна игры."""
 RES = WIDTH, HEIGHT = W * TILE + 10, H * TILE + TILE
-"""Границы кнопки паузы"""
+"""Границы кнопки паузы."""
 PAUSE_X = (W * TILE - TILE * 0.75, W * TILE - TILE * 0.2)
 PAUSE_Y = (H * TILE, H * TILE + TILE * 0.6)
 

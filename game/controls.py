@@ -1,13 +1,12 @@
 import sys
 
-import pygame
-
 import paused_menu
+import pygame
 from settings import (BORDER_X, BORDER_Y, PAUSE_X, PAUSE_Y, THREE_QUARTERS,
                       TILE, UPDATE_PAUSE_X, UPDATE_PAUSE_Y, H)
 
 
-def events(self):
+def events(self) -> None:
     """Обрабатывает нажатия с клавиатуры и мыши."""
     self.dx = 0
     for event in pygame.event.get():
@@ -37,6 +36,7 @@ def events(self):
                     game.play()
                 else:
                     self.paused = False
+
             else:
                 """Обработка нажатий по игровому полю."""
                 if (BORDER_X[0] < self.pos_x < BORDER_X[1]

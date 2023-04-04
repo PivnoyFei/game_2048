@@ -1,13 +1,12 @@
-import pygame
-
 import controls
 import figure
+import pygame
 from settings import (HALF_TILE, HEIGHT, MY_FONT_PAUSED, THREE_QUARTERS,
                       TRAFFIC_BLACK, UPDATE_PAUSE_X, UPDATE_PAUSE_Y, WHITE,
                       WIDTH)
 
 
-def print_paused_text(self):
+def print_paused_text(self) -> None:
     """Рисует поступающие кадры прыгающего текста."""
     myfont = pygame.font.SysFont(MY_FONT_PAUSED, int(HALF_TILE * 0.8))
     text = myfont.render("Нажмите, чтобы начать", True, WHITE)
@@ -15,7 +14,7 @@ def print_paused_text(self):
     self.sc.blit(text, text_center)
 
 
-def print_paused_figure(self, x, filename, rotate=None):
+def print_paused_figure(self, x: int, filename: str, rotate: int | None = None) -> None:
     """Рисует кнопку перезапуска и закрытия игры."""
     size = HALF_TILE
     figur = pygame.Rect(x, UPDATE_PAUSE_Y, THREE_QUARTERS, THREE_QUARTERS)
@@ -30,7 +29,7 @@ def print_paused_figure(self, x, filename, rotate=None):
     self.sc.blit(image, new_rect)
 
 
-def paused_game_menu(self):
+def paused_game_menu(self) -> None:
     """Рисует меню паузы."""
     ground = HEIGHT // 3
     jump_force = 5
@@ -39,7 +38,7 @@ def paused_game_menu(self):
 
     """Анимация затухания экрана с прозрачностью."""
     for _ in range(10):
-        self.alpha_sc.fill((0, 0, 25, 15))
+        self.alpha_sc.fill((5, 0, 25, 15))
         self.sc.blit(self.alpha_sc, (0, 0))
         pygame.display.update()
         self.clock.tick(40)
@@ -52,10 +51,10 @@ def paused_game_menu(self):
         figure.draw_text_game(self)
         figure.lower_menu(self)
         figure.draw_figure(self, self.game_sc, self.figure, self.num)
-        self.alpha_sc.fill((0, 0, 25, 150))
+        self.alpha_sc.fill((5, 0, 25, 150))
         self.sc.blit(self.alpha_sc, (0, 0))
 
-        if True and ground == self.paused_figure:
+        if ground == self.paused_figure:
             move = -jump_force
         if move <= jump_force:
             if self.paused_figure + move < ground:

@@ -1,12 +1,11 @@
 from random import randrange
 
 import pygame
-
 from settings import (BLACK, BORDER_X, BORDER_Y, CP, FPS, GOLD, HALF_TILE,
                       HEIGHT, TILE, TRAFFIC_BLACK, WHITE, WIDTH, H, W)
 
 
-def __figure(num_one, num_two, num_three):
+def _figure(num_one: int | float, num_two: int, num_three: int) -> pygame.Rect:
     """Рисует геометрию кубик на поле."""
     return pygame.Rect(
         W * HALF_TILE - HALF_TILE + num_one,
@@ -17,11 +16,15 @@ def __figure(num_one, num_two, num_three):
 
 
 def draw_figure(
-        self, sc, figure, num, myfont=False,
-        x=HALF_TILE - 2, y=HALF_TILE - 4
-):
+        self, sc: pygame.Surface,
+        figure: pygame.Rect,
+        num: int,
+        font: bool | None = False,
+        x: int | None = HALF_TILE - 2,
+        y: int | None = HALF_TILE - 4,
+) -> None:
     """Отображает конкретную фигуру с номером, на поле."""
-    if myfont:
+    if font:
         myfont_one, myfont_two = self.myfont_three, self.myfont_four
     else:
         myfont_one, myfont_two = self.myfont_one, self.myfont_two
@@ -49,17 +52,17 @@ def draw_figure(
     sc.blit(text_surface, self.text_rect)
 
 
-def lower_menu(self):
+def lower_menu(self) -> None:
     """Отображает нижнее меню (номер, следующий номер, кнопку паузы)."""
-    figure = __figure(7, 8, TILE - 4)
+    figure = _figure(7, 8, TILE - 4)
     draw_figure(self, self.sc, figure, self.num)
 
-    figure = __figure(TILE * 1.3, 18, HALF_TILE + 4)
+    figure = _figure(TILE * 1.3, 18, HALF_TILE + 4)
     draw_figure(
         self, self.sc, figure, self.next_num, True,
         TILE // 4 + 2, TILE // 4)
 
-    figure = __figure(TILE * 2.25, 18, HALF_TILE + 4)
+    figure = _figure(TILE * 2.25, 18, HALF_TILE + 4)
     pygame.draw.rect(self.sc, TRAFFIC_BLACK, figure, border_radius=4)
     [pygame.draw.rect(
         self.sc, WHITE,
@@ -72,7 +75,7 @@ def lower_menu(self):
         border_radius=4) for i in range(2)]
 
 
-def draw_item_game(self):
+def draw_item_game(self) -> None:
     """Отображает игровое поле."""
     self.sc.fill(BLACK)
 
@@ -101,7 +104,7 @@ def draw_item_game(self):
     )
 
 
-def draw_text_game(self):
+def draw_text_game(self) -> None:
     """Отображает верхнее меню (текущий счет, рекорд)."""
     text = self.myfont_one.render(f"{self.score}", True, WHITE)
     self.sc.blit(text, text.get_rect(center=(WIDTH // 2, TILE // 3)))
@@ -110,7 +113,12 @@ def draw_text_game(self):
 
 
 def cube_animation_repeat(
-        self, game_sc, figure, figure_2=None, figure_3=None, col=None):
+    self, game_sc: pygame.Surface,
+    col: int,
+    figure: pygame.Rect,
+    figure_2: pygame.Rect | None = None,
+    figure_3: pygame.Rect | None = None,
+) -> None:
     """Рисует поступающие кадры движения конкретного кубика(-ов)."""
     draw_item_game(self)
     draw_figure(self, game_sc, figure, col)
@@ -127,7 +135,7 @@ def cube_animation_repeat(
     self.clock.tick(FPS)
 
 
-def get_right_left_animation_cube(self, x, y, col):
+def get_right_left_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация слияния трех соседних кубиков."""
     self.figure.x, self.figure.y = (x - 1) * TILE + 2, y * TILE + 2
     self.figure_2.x, self.figure_2.y = (x + 1) * TILE + 2, y * TILE + 2
@@ -136,12 +144,10 @@ def get_right_left_animation_cube(self, x, y, col):
     for _ in range(TILE // 8):
         self.figure.x += 8
         self.figure_2.x -= 8
-        cube_animation_repeat(
-            self, self.game_sc, self.figure, self.figure_2, col=col
-        )
+        cube_animation_repeat(self, self.game_sc, col, self.figure, self.figure_2)
 
 
-def get_folding_animation_cube(self, x, y, col):
+def get_folding_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация слияния четырех соседних кубиков."""
     self.figure.x, self.figure.y = x * TILE + 2, (y - 1) * TILE + 2
     self.figure_2.x, self.figure_2.y = (x + 1) * TILE + 2, y * TILE + 2
@@ -152,52 +158,50 @@ def get_folding_animation_cube(self, x, y, col):
         self.figure.y += 8
         self.figure_2.x -= 8
         self.figure_3.x += 8
-        cube_animation_repeat(
-            self, self.game_sc, self.figure, self.figure_2, self.figure_3, col
-        )
+        cube_animation_repeat(self, self.game_sc, col, self.figure, self.figure_2, self.figure_3)
 
 
-def get_up_animation_cube(self, x, y, col):
+def get_up_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация поглощения верхнего кубика нижним."""
     self.figure.x, self.figure.y = x * TILE + 2, (y - 1) * TILE + 2
     self.merge_sound.play()
 
     for _ in range(TILE // 8):
         self.figure.y += 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, self.figure)
 
 
-def get_down_animation_cube(self, x, y, col):
+def get_down_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация падения кубика пустую клетку."""
     self.figure.x, self.figure.y = x * TILE + 2, y * TILE + 2
     self.falling_sound.play()
 
     for _ in range(TILE // 10):
         self.figure.y -= 10
-        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, self.figure)
 
 
-def get_left_animation_cube(self, x, y, col):
+def get_left_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация поглощения правого кубика левым (сдвиг в левую сторону)."""
     self.figure.x, self.figure.y = (x + 1) * TILE + 2, y * TILE + 2
     self.merge_sound.play()
 
     for _ in range(TILE // 8):
         self.figure.x -= 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, self.figure)
 
 
-def get_right_animation_cube(self, x, y, col):
+def get_right_animation_cube(self, x: int, y: int, col: int) -> None:
     """Анимация поглощения левого кубика правым (сдвиг в правую сторону)."""
     self.figure.x, self.figure.y = (x - 1) * TILE + 2, y * TILE + 2
     self.merge_sound.play()
 
     for _ in range(TILE // 8):
         self.figure.x += 8
-        cube_animation_repeat(self, self.game_sc, self.figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, self.figure)
 
 
-def get_animation_cube(self, col):
+def get_animation_cube(self, col: int) -> None:
     """Анимация падения кубика после нажатия кнопки."""
     a, b = TILE + 1.4, TILE - 1
     source = self.figure.x
@@ -207,7 +211,7 @@ def get_animation_cube(self, col):
         b -= 1
         self.figure.x -= 1
         figure = pygame.Rect(self.figure.x, self.figure.y, a, b)
-        cube_animation_repeat(self, self.game_sc, figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, figure)
     a -= 3
     b += 1
     self.figure.x += 1
@@ -216,5 +220,5 @@ def get_animation_cube(self, col):
         b += 2
         self.figure.x += 3
         figure = pygame.Rect(self.figure.x, self.figure.y, a, b)
-        cube_animation_repeat(self, self.game_sc, figure, col=col)
+        cube_animation_repeat(self, self.game_sc, col, figure)
     self.figure.x = source
